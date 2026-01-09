@@ -1,0 +1,467 @@
+# Bank Analyzer - Categorization Rules
+# Copy this file to rules.yaml and customize
+#
+# Rule structure:
+#   name: unique rule name
+#   pattern: text/regex to match
+#   field: counterparty or description
+#   match_type: contains, exact, regex, startswith, endswith
+#   case_sensitive: true/false (default: false)
+#   priority: higher = checked first (default: 10)
+#   category_main: main category name
+#   category_sub: subcategory name
+
+rules:
+  # ==================== JEDZENIE ====================
+
+  # Sieci spożywcze
+  - name: "biedronka"
+    pattern: "biedronka"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "lidl"
+    pattern: "lidl"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "kaufland"
+    pattern: "kaufland"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "carrefour"
+    pattern: "carrefour"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "auchan"
+    pattern: "auchan"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "zabka"
+    pattern: "zabka|żabka"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "delikatesy_centrum"
+    pattern: "delikatesy"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "frisco"
+    pattern: "frisco"
+    field: "description"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "stokrotka"
+    pattern: "stokrotka"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  - name: "netto"
+    pattern: "netto"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Zakupy spożywcze"
+
+  # Restauracje fast food
+  - name: "mcdonalds"
+    pattern: "mcdonald|mc donald"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Restauracje"
+
+  - name: "kfc"
+    pattern: "^kfc|kentucky"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Restauracje"
+
+  - name: "burger_king"
+    pattern: "burger king"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Restauracje"
+
+  - name: "subway"
+    pattern: "subway"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Restauracje"
+
+  - name: "pizza_hut"
+    pattern: "pizza hut"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Restauracje"
+
+  # Dostawy jedzenia
+  - name: "uber_eats"
+    pattern: "uber.*eats"
+    field: "description"
+    match_type: "regex"
+    priority: 15
+    category_main: "Jedzenie"
+    category_sub: "Jedzenie na wynos"
+
+  - name: "pyszne_pl"
+    pattern: "pyszne"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Jedzenie"
+    category_sub: "Jedzenie na wynos"
+
+  - name: "wolt"
+    pattern: "wolt"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 15
+    category_main: "Jedzenie"
+    category_sub: "Jedzenie na wynos"
+
+  - name: "glovo"
+    pattern: "glovo"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 15
+    category_main: "Jedzenie"
+    category_sub: "Jedzenie na wynos"
+
+  # Kawiarnie
+  - name: "starbucks"
+    pattern: "starbucks"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Kawiarnie"
+
+  - name: "costa_coffee"
+    pattern: "costa"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Jedzenie"
+    category_sub: "Kawiarnie"
+
+  # ==================== TRANSPORT ====================
+
+  # Stacje benzynowe
+  - name: "orlen"
+    pattern: "orlen"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Transport"
+    category_sub: "Paliwo"
+
+  - name: "bp"
+    pattern: "^bp\\s|^bp-"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 10
+    category_main: "Transport"
+    category_sub: "Paliwo"
+
+  - name: "shell"
+    pattern: "shell"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Transport"
+    category_sub: "Paliwo"
+
+  - name: "circle_k"
+    pattern: "circle k"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Transport"
+    category_sub: "Paliwo"
+
+  - name: "lotos"
+    pattern: "lotos"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Transport"
+    category_sub: "Paliwo"
+
+  # Taxi i transport
+  - name: "uber"
+    pattern: "uber(?!.*eats)"
+    field: "description"
+    match_type: "regex"
+    priority: 15
+    category_main: "Transport"
+    category_sub: "Taxi/Uber"
+
+  - name: "bolt_taxi"
+    pattern: "bolt"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Transport"
+    category_sub: "Taxi/Uber"
+
+  - name: "free_now"
+    pattern: "free.?now"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 15
+    category_main: "Transport"
+    category_sub: "Taxi/Uber"
+
+  - name: "jakdojade"
+    pattern: "jakdojade"
+    field: "description"
+    match_type: "contains"
+    priority: 10
+    category_main: "Transport"
+    category_sub: "Komunikacja miejska"
+
+  # ==================== SUBSKRYPCJE ====================
+
+  - name: "netflix"
+    pattern: "netflix"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Streaming (Netflix, Spotify, HBO)"
+
+  - name: "spotify"
+    pattern: "spotify"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Streaming (Netflix, Spotify, HBO)"
+
+  - name: "hbo"
+    pattern: "hbo"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Streaming (Netflix, Spotify, HBO)"
+
+  - name: "disney_plus"
+    pattern: "disney"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Streaming (Netflix, Spotify, HBO)"
+
+  - name: "youtube_premium"
+    pattern: "youtube.*premium|google.*youtube"
+    field: "description"
+    match_type: "regex"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Streaming (Netflix, Spotify, HBO)"
+
+  - name: "apple_services"
+    pattern: "apple\\.com|itunes"
+    field: "description"
+    match_type: "regex"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Oprogramowanie i cloud"
+
+  - name: "google_one"
+    pattern: "google.*storage|google one"
+    field: "description"
+    match_type: "regex"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Oprogramowanie i cloud"
+
+  - name: "storytel"
+    pattern: "storytel"
+    field: "description"
+    match_type: "contains"
+    priority: 15
+    category_main: "Subskrypcje i abonamenty"
+    category_sub: "Streaming (Netflix, Spotify, HBO)"
+
+  # ==================== ZDROWIE ====================
+
+  - name: "apteka"
+    pattern: "apteka"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Zdrowie"
+    category_sub: "Apteka"
+
+  - name: "gemini_apteka"
+    pattern: "gemini"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Zdrowie"
+    category_sub: "Apteka"
+
+  - name: "doz"
+    pattern: "^doz"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 10
+    category_main: "Zdrowie"
+    category_sub: "Apteka"
+
+  - name: "rossmann"
+    pattern: "rossmann"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Zdrowie"
+    category_sub: "Apteka"
+
+  # ==================== ODZIEŻ ====================
+
+  - name: "reserved"
+    pattern: "reserved"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Ubrania i akcesoria"
+    category_sub: "Odzież"
+
+  - name: "zara"
+    pattern: "zara"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Ubrania i akcesoria"
+    category_sub: "Odzież"
+
+  - name: "hm"
+    pattern: "h&m|h m |hennes"
+    field: "counterparty"
+    match_type: "regex"
+    priority: 10
+    category_main: "Ubrania i akcesoria"
+    category_sub: "Odzież"
+
+  - name: "zalando"
+    pattern: "zalando"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Ubrania i akcesoria"
+    category_sub: "Odzież"
+
+  # ==================== SPORT I FITNESS ====================
+
+  - name: "decathlon"
+    pattern: "decathlon"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Rozrywka"
+    category_sub: "Sport i fitness"
+
+  - name: "silownia"
+    pattern: "siłownia|silownia|fitness|gym"
+    field: "description"
+    match_type: "regex"
+    priority: 10
+    category_main: "Rozrywka"
+    category_sub: "Sport i fitness"
+
+  # ==================== ROZRYWKA ====================
+
+  - name: "cinema_city"
+    pattern: "cinema city"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Rozrywka"
+    category_sub: "Kino/teatr/koncerty"
+
+  - name: "multikino"
+    pattern: "multikino"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Rozrywka"
+    category_sub: "Kino/teatr/koncerty"
+
+  - name: "helios"
+    pattern: "helios"
+    field: "counterparty"
+    match_type: "contains"
+    priority: 10
+    category_main: "Rozrywka"
+    category_sub: "Kino/teatr/koncerty"
+
+  # ==================== INNE ====================
+
+  - name: "oplata_bankowa"
+    pattern: "opłata.*kart|prowadzenie.*rachunk|opłata podstawowa"
+    field: "description"
+    match_type: "regex"
+    priority: 20
+    category_main: "Inne wydatki"
+    category_sub: "Opłaty bankowe"
+
+  - name: "amazon"
+    pattern: "amazon"
+    field: "description"
+    match_type: "contains"
+    priority: 10
+    category_main: "Inne wydatki"
+    category_sub: "Nieprzypisane"
+
+  - name: "allegro"
+    pattern: "allegro"
+    field: "description"
+    match_type: "contains"
+    priority: 10
+    category_main: "Inne wydatki"
+    category_sub: "Nieprzypisane"
