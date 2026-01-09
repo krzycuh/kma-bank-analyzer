@@ -166,19 +166,20 @@ def analyze(ctx, files, output, rules, overrides, json_output):
     # Show uncategorized transactions for easier rule improvement
     uncategorized_trans = [t for t in filtered_transactions if t.category_sub == "Nieprzypisane"]
     if uncategorized_trans:
-        click.echo("\n" + "-" * 50)
-        click.echo("UNCATEGORIZED TRANSACTIONS (add rules for these):")
-        click.echo("-" * 50)
+        click.echo("\n" + "-" * 70)
+        click.echo("UNCATEGORIZED TRANSACTIONS:")
+        click.echo("-" * 70)
         for trans in uncategorized_trans[:20]:  # Show max 20
             click.echo(
-                f"  {trans.date.strftime('%Y-%m-%d')} | "
-                f"{trans.amount:>8.2f} PLN | "
-                f"{trans.counterparty[:25]:<25} | "
-                f"{trans.description[:40]}"
+                f"  [{trans.id}] {trans.date.strftime('%Y-%m-%d')} | "
+                f"{trans.amount:>8.2f} PLN | {trans.counterparty[:30]}"
             )
         if len(uncategorized_trans) > 20:
             click.echo(f"  ... and {len(uncategorized_trans) - 20} more")
-        click.echo("-" * 50)
+        click.echo("-" * 70)
+        click.echo("Tip: Add a rule to config/rules.yaml, or for one-time override run:")
+        click.echo("  bank-analyzer override <ID> \"Category\" \"Subcategory\"")
+        click.echo("-" * 70)
 
     # Use filtered transactions for aggregation
     all_transactions = filtered_transactions
@@ -375,6 +376,84 @@ def reprocess(ctx, source, rules, output):
         output=output,
         rules=rules,
     )
+
+
+@cli.command()
+@click.argument('transaction_id')
+@click.argument('category_main')
+@click.argument('category_sub')
+@click.option(
+    '--note', '-n',
+    default='',
+    help='Optional note explaining the override'
+)
+@click.option(
+    '--overrides-file',
+    type=click.Path(),
+    default='data/manual_overrides.yaml',
+    help='Manual overrides YAML file'
+)
+def override(transaction_id, category_main, category_sub, note, overrides_file):
+    """
+    Add manual category override for a specific transaction.
+
+    This is useful when a transaction doesn't fit the general rule
+    for that merchant (e.g., buying a gift at a sports store).
+
+    \b
+    TRANSACTION_ID: The transaction ID (shown in brackets in uncategorized list)
+    CATEGORY_MAIN: Main category (e.g., "Prezenty i okazje")
+    CATEGORY_SUB: Subcategory (e.g., "Prezenty urodzinowe")
+
+    \b
+    Example:
+      bank-analyzer override abc123def456 "Prezenty i okazje" "Prezenty urodzinowe"
+      bank-analyzer override abc123def456 "Rozrywka" "Sport" -n "Własny trening"
+    """
+    from pathlib import Path
+
+    overrides_path = Path(overrides_file)
+    overrides_path.parent.mkdir(parents=True, exist_ok=True)
+
+    manual_overrides = ManualOverrides(overrides_path)
+    manual_overrides.add(transaction_id, category_main, category_sub, note)
+
+    click.echo(f"Override added for transaction {transaction_id}:")
+    click.echo(f"  Category: {category_main} > {category_sub}")
+    if note:
+        click.echo(f"  Note: {note}")
+    click.echo(f"\nSaved to: {overrides_file}")
+    click.echo("Run 'bank-analyzer analyze' again to apply.")
+
+
+@cli.command()
+@click.option(
+    '--overrides-file',
+    type=click.Path(exists=True),
+    default='data/manual_overrides.yaml',
+    help='Manual overrides YAML file'
+)
+def list_overrides(overrides_file):
+    """List all manual category overrides."""
+    from pathlib import Path
+
+    overrides_path = Path(overrides_file)
+    if not overrides_path.exists():
+        click.echo("No overrides file found.")
+        return
+
+    manual_overrides = ManualOverrides(overrides_path)
+    all_overrides = manual_overrides.list_all()
+
+    if not all_overrides:
+        click.echo("No overrides defined.")
+        return
+
+    click.echo(f"Manual overrides ({len(all_overrides)}):")
+    click.echo("-" * 60)
+    for trans_id, (cat_main, cat_sub) in all_overrides.items():
+        click.echo(f"  [{trans_id}] {cat_main} > {cat_sub}")
+    click.echo("-" * 60)
 
 
 @cli.command()
