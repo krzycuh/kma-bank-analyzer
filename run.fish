@@ -32,12 +32,12 @@ end
 function find_python
     for cmd in python3.12 python3.11 python3.10 python3.9 python3 python
         if command -v $cmd >/dev/null 2>&1
-            set version ($cmd -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
-            set major (string split '.' $version)[1]
-            set minor (string split '.' $version)[2]
+            set py_version ($cmd -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
+            set major (string split '.' $py_version)[1]
+            set minor (string split '.' $py_version)[2]
             if test "$major" -ge 3; and test "$minor" -ge 9
                 set -g PYTHON_CMD $cmd
-                echo_info "Found Python $version ($cmd)"
+                echo_info "Found Python $py_version ($cmd)"
                 return 0
             end
         end
