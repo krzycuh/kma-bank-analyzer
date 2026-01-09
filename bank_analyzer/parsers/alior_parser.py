@@ -101,8 +101,12 @@ class AliorParser(BaseParser):
 
         trans_type = 'expense' if is_expense else 'income'
 
-        # Extract counterparty - combine all available info
-        counterparty = self._extract_counterparty(sender, recipient, description)
+        # Extract counterparty based on transaction type
+        # For expenses: we care about recipient (who we're paying)
+        # For income: we care about sender (who's paying us)
+        counterparty = self._extract_counterparty(
+            sender, recipient, description, is_expense
+        )
 
         # Build full description from all non-empty fields
         desc_parts = []
@@ -126,16 +130,25 @@ class AliorParser(BaseParser):
         )
 
     def _extract_counterparty(
-        self, sender: str, recipient: str, description: str
+        self, sender: str, recipient: str, description: str, is_expense: bool
     ) -> str:
-        """Extract counterparty from available fields."""
-        # Priority: sender > recipient > extract from description
+        """Extract counterparty from available fields.
 
-        if sender and sender.strip():
-            return self._clean_text(sender)
-
-        if recipient and recipient.strip():
-            return self._clean_text(recipient)
+        For expenses: prioritize recipient (who we're paying to)
+        For income: prioritize sender (who's paying us)
+        """
+        if is_expense:
+            # For expenses, we want the recipient first
+            if recipient and recipient.strip():
+                return self._clean_text(recipient)
+            if sender and sender.strip():
+                return self._clean_text(sender)
+        else:
+            # For income, we want the sender first
+            if sender and sender.strip():
+                return self._clean_text(sender)
+            if recipient and recipient.strip():
+                return self._clean_text(recipient)
 
         if description:
             # Try to extract name before " PL"
