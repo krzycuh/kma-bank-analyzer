@@ -163,6 +163,23 @@ def analyze(ctx, files, output, rules, overrides, json_output):
     click.echo(f"  Categorized: {categorized_count}")
     click.echo(f"  Uncategorized: {uncategorized}")
 
+    # Show uncategorized transactions for easier rule improvement
+    uncategorized_trans = [t for t in filtered_transactions if t.category_sub == "Nieprzypisane"]
+    if uncategorized_trans:
+        click.echo("\n" + "-" * 50)
+        click.echo("UNCATEGORIZED TRANSACTIONS (add rules for these):")
+        click.echo("-" * 50)
+        for trans in uncategorized_trans[:20]:  # Show max 20
+            click.echo(
+                f"  {trans.date.strftime('%Y-%m-%d')} | "
+                f"{trans.amount:>8.2f} PLN | "
+                f"{trans.counterparty[:25]:<25} | "
+                f"{trans.description[:40]}"
+            )
+        if len(uncategorized_trans) > 20:
+            click.echo(f"  ... and {len(uncategorized_trans) - 20} more")
+        click.echo("-" * 50)
+
     # Use filtered transactions for aggregation
     all_transactions = filtered_transactions
 
