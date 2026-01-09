@@ -1,0 +1,92 @@
+# Bank Analyzer - Categories Configuration
+# Copy this file to categories.yaml and customize
+
+categories:
+  - name: "Dom i mieszkanie"
+    subcategories:
+      - "Czynsz/hipoteka"
+      - "Media (prąd, gaz, woda)"
+      - "Wyposażenie domu"
+      - "Naprawy i konserwacja"
+      - "Środki czystości"
+
+  - name: "Transport"
+    subcategories:
+      - "Paliwo"
+      - "Komunikacja miejska"
+      - "Taxi/Uber"
+      - "Serwis pojazdu"
+      - "Ubezpieczenie pojazdu"
+      - "Parkingi i opłaty drogowe"
+
+  - name: "Jedzenie"
+    subcategories:
+      - "Zakupy spożywcze"
+      - "Restauracje"
+      - "Kawiarnie"
+      - "Jedzenie na wynos"
+
+  - name: "Zdrowie"
+    subcategories:
+      - "Lekarze i specjaliści"
+      - "Apteka"
+      - "Suplementy i witaminy"
+      - "Ubezpieczenie zdrowotne"
+
+  - name: "Rozrywka"
+    subcategories:
+      - "Kino/teatr/koncerty"
+      - "Hobby i zainteresowania"
+      - "Sport i fitness"
+      - "Wakacje i wyjazdy"
+
+  - name: "Edukacja i rozwój"
+    subcategories:
+      - "Kursy i szkolenia"
+      - "Książki"
+      - "Konferencje"
+
+  - name: "Ubrania i akcesoria"
+    subcategories:
+      - "Odzież"
+      - "Obuwie"
+      - "Akcesoria"
+
+  - name: "Subskrypcje i abonamenty"
+    subcategories:
+      - "Streaming (Netflix, Spotify, HBO)"
+      - "Telefon i internet"
+      - "Oprogramowanie i cloud"
+      - "Członkostwa i składki"
+
+  - name: "Dzieci"
+    subcategories:
+      - "Przedszkole/szkoła"
+      - "Zajęcia dodatkowe"
+      - "Odzież i obuwie"
+      - "Zabawki i gry"
+
+  - name: "Zwierzęta"
+    subcategories:
+      - "Karma i przysmaki"
+      - "Weterynarz"
+      - "Akcesoria"
+
+  - name: "Oszczędności i inwestycje"
+    subcategories:
+      - "Lokaty"
+      - "Fundusze inwestycyjne"
+      - "Kryptowaluty"
+
+  - name: "Prezenty i okazje"
+    subcategories:
+      - "Prezenty urodzinowe"
+      - "Prezenty świąteczne"
+      - "Darowizny"
+
+  - name: "Inne wydatki"
+    subcategories:
+      - "Opłaty bankowe"
+      - "Opłaty pocztowe"
+      - "Ubezpieczenia inne"
+      - "Nieprzypisane"
