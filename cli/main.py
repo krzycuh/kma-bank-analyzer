@@ -459,6 +459,151 @@ def list_overrides(overrides_file):
 
 
 @cli.command()
+@click.argument('pattern')
+@click.argument('category_main')
+@click.argument('category_sub')
+@click.option(
+    '--name', '-n',
+    default=None,
+    help='Rule name (default: auto-generated from pattern)'
+)
+@click.option(
+    '--field', '-f',
+    type=click.Choice(['counterparty', 'description']),
+    default='counterparty',
+    help='Field to match against (default: counterparty)'
+)
+@click.option(
+    '--match-type', '-m',
+    type=click.Choice(['contains', 'exact', 'regex', 'startswith', 'endswith']),
+    default='contains',
+    help='Match type (default: contains)'
+)
+@click.option(
+    '--priority', '-p',
+    type=int,
+    default=10,
+    help='Rule priority - higher = checked first (default: 10)'
+)
+@click.option(
+    '--rules-file',
+    type=click.Path(),
+    default='config/rules.yaml',
+    help='Rules YAML file'
+)
+def add_rule(pattern, category_main, category_sub, name, field, match_type, priority, rules_file):
+    """
+    Add a new categorization rule.
+
+    Creates a permanent rule that will categorize all matching transactions.
+
+    \b
+    PATTERN: Text or regex to match
+    CATEGORY_MAIN: Main category (e.g., "Jedzenie")
+    CATEGORY_SUB: Subcategory (e.g., "Zakupy spożywcze")
+
+    \b
+    Examples:
+      bank-analyzer add-rule "biedronka" "Jedzenie" "Zakupy spożywcze"
+      bank-analyzer add-rule "netflix" "Subskrypcje" "Streaming" -f description
+      bank-analyzer add-rule "uber.*eats" "Jedzenie" "Na wynos" -m regex
+    """
+    from pathlib import Path
+    import yaml
+
+    rules_path = Path(rules_file)
+    rules_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Generate rule name if not provided
+    if not name:
+        # Clean pattern for use as name
+        name = pattern.lower()
+        name = ''.join(c if c.isalnum() else '_' for c in name)
+        name = name.strip('_')[:30]
+
+    # Load existing rules
+    if rules_path.exists():
+        with open(rules_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f) or {}
+    else:
+        data = {}
+
+    if 'rules' not in data:
+        data['rules'] = []
+
+    # Check if rule with same name exists
+    existing_names = {r.get('name') for r in data['rules']}
+    if name in existing_names:
+        click.echo(f"Warning: Rule '{name}' already exists, adding with suffix")
+        i = 2
+        while f"{name}_{i}" in existing_names:
+            i += 1
+        name = f"{name}_{i}"
+
+    # Create new rule
+    new_rule = {
+        'name': name,
+        'pattern': pattern,
+        'field': field,
+        'match_type': match_type,
+        'priority': priority,
+        'category_main': category_main,
+        'category_sub': category_sub,
+    }
+
+    data['rules'].append(new_rule)
+
+    # Save
+    with open(rules_path, 'w', encoding='utf-8') as f:
+        yaml.dump(data, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
+
+    click.echo(f"Rule '{name}' added:")
+    click.echo(f"  Pattern: {pattern} ({match_type} in {field})")
+    click.echo(f"  Category: {category_main} > {category_sub}")
+    click.echo(f"  Priority: {priority}")
+    click.echo(f"\nSaved to: {rules_file}")
+    click.echo("Run 'bank-analyzer analyze' again to apply.")
+
+
+@cli.command()
+@click.option(
+    '--rules-file',
+    type=click.Path(exists=True),
+    default='config/rules.yaml',
+    help='Rules YAML file'
+)
+def list_rules(rules_file):
+    """List all categorization rules."""
+    from pathlib import Path
+    import yaml
+
+    rules_path = Path(rules_file)
+    if not rules_path.exists():
+        click.echo("No rules file found.")
+        return
+
+    with open(rules_path, 'r', encoding='utf-8') as f:
+        data = yaml.safe_load(f) or {}
+
+    rules = data.get('rules', [])
+    if not rules:
+        click.echo("No rules defined.")
+        return
+
+    click.echo(f"Categorization rules ({len(rules)}):")
+    click.echo("-" * 80)
+    for rule in rules:
+        name = rule.get('name', '?')
+        pattern = rule.get('pattern', '')
+        field = rule.get('field', 'counterparty')
+        match_type = rule.get('match_type', 'contains')
+        cat_main = rule.get('category_main', '?')
+        cat_sub = rule.get('category_sub', '?')
+        click.echo(f"  {name}: '{pattern}' ({match_type} in {field}) -> {cat_main} > {cat_sub}")
+    click.echo("-" * 80)
+
+
+@cli.command()
 def version():
     """Show version information."""
     from bank_analyzer import __version__
