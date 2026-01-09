@@ -169,15 +169,15 @@ def analyze(ctx, files, output, rules, overrides, json_output):
         click.echo("\n" + "-" * 100)
         click.echo("UNCATEGORIZED TRANSACTIONS:")
         click.echo("-" * 100)
-        for trans in uncategorized_trans[:20]:  # Show max 20
+        for trans in uncategorized_trans[:100]:  # Show max 100
             # Build description - use full description if different from counterparty
             desc = trans.description if trans.description != trans.counterparty else ""
             click.echo(
                 f"  [{trans.id}] {trans.date.strftime('%Y-%m-%d')} | "
-                f"{trans.amount:>8.2f} | {trans.counterparty[:25]:<25} | {desc[:50]}"
+                f"{trans.amount:>8.2f} | {trans.counterparty} | {desc}"
             )
-        if len(uncategorized_trans) > 20:
-            click.echo(f"  ... and {len(uncategorized_trans) - 20} more")
+        if len(uncategorized_trans) > 100:
+            click.echo(f"  ... and {len(uncategorized_trans) - 100} more")
         click.echo("-" * 100)
         click.echo("Tip: Add a rule to config/rules.yaml, or for one-time override run:")
         click.echo("  bank-analyzer override <ID> \"Category\" \"Subcategory\"")
