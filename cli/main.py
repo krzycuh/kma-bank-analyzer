@@ -107,8 +107,7 @@ def analyze(ctx, files, output, rules, overrides, json_output):
 
     click.echo(f"\nTotal: {len(all_transactions)} transactions")
 
-    # Categorization
-    click.echo("\nCategorizing transactions...")
+    # Load rules
     rules_file = Path(rules) if rules else config_dir / 'rules.yaml'
 
     if rules_file.exists():
@@ -118,11 +117,36 @@ def analyze(ctx, files, output, rules, overrides, json_output):
         click.echo("  Using empty rules (all will be uncategorized)")
         rule_engine = RuleEngine(None)
 
+    # Filter out excluded transactions
+    click.echo("\nFiltering excluded transactions...")
+    filtered_transactions = []
+    excluded_count = 0
+
+    for trans in all_transactions:
+        should_exclude, reason = rule_engine.should_exclude(trans)
+        if should_exclude:
+            excluded_count += 1
+            logger.debug(f"Excluded: {trans.counterparty} - {reason}")
+        else:
+            filtered_transactions.append(trans)
+
+    if excluded_count > 0:
+        click.echo(f"  Excluded: {excluded_count} transactions")
+        # Show exclusion stats
+        exclude_stats = rule_engine.get_exclude_stats()
+        if exclude_stats:
+            for rule_name, count in sorted(exclude_stats.items(), key=lambda x: x[1], reverse=True):
+                click.echo(f"    - {rule_name}: {count}")
+
+    click.echo(f"  Remaining: {len(filtered_transactions)} transactions")
+
+    # Categorization
+    click.echo("\nCategorizing transactions...")
     overrides_file = Path(overrides)
     manual_overrides = ManualOverrides(overrides_file if overrides_file.exists() else None)
 
     categorized_count = 0
-    for trans in all_transactions:
+    for trans in filtered_transactions:
         # Check manual override first
         override = manual_overrides.get(trans.id)
         if override:
@@ -135,9 +159,12 @@ def analyze(ctx, files, output, rules, overrides, json_output):
             if trans.category_sub != "Nieprzypisane":
                 categorized_count += 1
 
-    uncategorized = len(all_transactions) - categorized_count
+    uncategorized = len(filtered_transactions) - categorized_count
     click.echo(f"  Categorized: {categorized_count}")
     click.echo(f"  Uncategorized: {uncategorized}")
+
+    # Use filtered transactions for aggregation
+    all_transactions = filtered_transactions
 
     # Aggregation
     click.echo("\nAggregating data...")

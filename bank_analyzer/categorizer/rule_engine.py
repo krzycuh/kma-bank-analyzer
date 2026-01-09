@@ -23,8 +23,11 @@ class RuleEngine:
         """
         self.rules_file = Path(rules_file) if rules_file else None
         self.rules: List[Dict] = []
+        self.exclude_rules: List[Dict] = []  # Exclusion rules
         self.compiled_patterns: Dict[int, re.Pattern] = {}
+        self.compiled_exclude_patterns: Dict[int, re.Pattern] = {}
         self.stats: Dict[str, int] = {}  # Rule usage statistics
+        self.exclude_stats: Dict[str, int] = {}  # Exclusion statistics
         self._cache: Dict[str, Tuple[str, str]] = {}  # Results cache
 
         if self.rules_file:
@@ -43,11 +46,12 @@ class RuleEngine:
                 data = yaml.safe_load(f)
 
             self.rules = data.get('rules', [])
+            self.exclude_rules = data.get('exclude', [])
 
             # Sort by priority (descending)
             self.rules.sort(key=lambda r: r.get('priority', 0), reverse=True)
 
-            # Pre-compile regex patterns
+            # Pre-compile regex patterns for categorization rules
             for idx, rule in enumerate(self.rules):
                 if rule.get('match_type') == 'regex':
                     flags = 0 if rule.get('case_sensitive', False) else re.IGNORECASE
@@ -60,7 +64,21 @@ class RuleEngine:
                             f"Invalid regex in rule '{rule.get('name', idx)}': {e}"
                         )
 
-            logger.info(f"Loaded {len(self.rules)} categorization rules")
+            # Pre-compile regex patterns for exclusion rules
+            for idx, rule in enumerate(self.exclude_rules):
+                if rule.get('match_type') == 'regex':
+                    flags = 0 if rule.get('case_sensitive', False) else re.IGNORECASE
+                    try:
+                        self.compiled_exclude_patterns[idx] = re.compile(
+                            rule['pattern'], flags
+                        )
+                    except re.error as e:
+                        logger.warning(
+                            f"Invalid regex in exclude rule '{rule.get('name', idx)}': {e}"
+                        )
+
+            logger.info(f"Loaded {len(self.rules)} categorization rules, "
+                       f"{len(self.exclude_rules)} exclusion rules")
 
         except ImportError:
             logger.error("PyYAML not installed. Cannot load rules.")
@@ -68,6 +86,71 @@ class RuleEngine:
         except Exception as e:
             logger.error(f"Error loading rules: {e}")
             self.rules = []
+
+    def should_exclude(self, transaction: Transaction) -> Tuple[bool, Optional[str]]:
+        """
+        Check if transaction should be excluded from analysis.
+
+        Args:
+            transaction: Transaction to check
+
+        Returns:
+            Tuple of (should_exclude, reason)
+        """
+        for idx, rule in enumerate(self.exclude_rules):
+            if self._match_exclude_rule(rule, transaction, idx):
+                rule_name = rule.get('name', f"exclude_{idx}")
+                reason = rule.get('reason', rule_name)
+
+                # Update statistics
+                self.exclude_stats[rule_name] = self.exclude_stats.get(rule_name, 0) + 1
+
+                return True, reason
+
+        return False, None
+
+    def _match_exclude_rule(
+        self, rule: Dict, transaction: Transaction, rule_idx: int
+    ) -> bool:
+        """Check if exclusion rule matches transaction."""
+        pattern = rule.get('pattern', '')
+        field_name = rule.get('field', 'description')
+        match_type = rule.get('match_type', 'contains')
+        case_sensitive = rule.get('case_sensitive', False)
+
+        # Get field value
+        if field_name == 'counterparty':
+            field_value = transaction.counterparty
+        elif field_name == 'description':
+            field_value = transaction.description
+        else:
+            field_value = ""
+
+        if not case_sensitive:
+            field_value = field_value.lower()
+            if isinstance(pattern, str) and match_type != 'regex':
+                pattern = pattern.lower()
+
+        # Match by type
+        if match_type == 'contains':
+            return pattern in field_value
+        elif match_type == 'exact':
+            return pattern == field_value
+        elif match_type == 'startswith':
+            return field_value.startswith(pattern)
+        elif match_type == 'endswith':
+            return field_value.endswith(pattern)
+        elif match_type == 'regex':
+            compiled = self.compiled_exclude_patterns.get(rule_idx)
+            if compiled:
+                return bool(compiled.search(field_value))
+            return False
+
+        return False
+
+    def get_exclude_stats(self) -> Dict[str, int]:
+        """Get exclusion rule usage statistics."""
+        return self.exclude_stats.copy()
 
     def categorize(self, transaction: Transaction) -> Tuple[str, str]:
         """

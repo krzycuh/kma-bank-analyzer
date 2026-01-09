@@ -11,6 +11,59 @@
 #   category_main: main category name
 #   category_sub: subcategory name
 
+# ==========================================
+# EXCLUDE - Transactions to skip entirely
+# ==========================================
+# Use this section to exclude transactions from analysis,
+# e.g., transfers between your own accounts.
+#
+# Exclude rule structure:
+#   name: unique rule name
+#   pattern: text/regex to match
+#   field: counterparty or description
+#   match_type: contains, exact, regex, startswith, endswith
+#   reason: (optional) description shown in stats
+
+exclude:
+  # Przelewy między własnymi kontami
+  - name: "przelew_wlasny_pko_alior"
+    pattern: "przelew własny|przelew wewnętrzny"
+    field: "description"
+    match_type: "regex"
+    reason: "Przelew między własnymi kontami"
+
+  - name: "przelew_na_oszczednosciowe"
+    pattern: "na rachunek oszczędnościowy|konto oszczędnościowe"
+    field: "description"
+    match_type: "regex"
+    reason: "Przelew na konto oszczędnościowe"
+
+  # Przykład: wykluczenie przelewów do konkretnej osoby (np. współmałżonek)
+  # - name: "przelew_do_zony"
+  #   pattern: "JAN KOWALSKI"
+  #   field: "counterparty"
+  #   match_type: "contains"
+  #   reason: "Przelew do współmałżonka"
+
+  # Przykład: wykluczenie przelewów na konkretny numer konta
+  # - name: "przelew_moje_drugie_konto"
+  #   pattern: "12 3456 7890 1234 5678 9012 3456"
+  #   field: "description"
+  #   match_type: "contains"
+  #   reason: "Moje drugie konto"
+
+  # Przykład: wykluczenie wpłat/wypłat gotówkowych (jeśli nie chcesz ich liczyć)
+  # - name: "wplata_bankomat"
+  #   pattern: "wpłata.*bankomat|wypłata.*bankomat"
+  #   field: "description"
+  #   match_type: "regex"
+  #   reason: "Operacje gotówkowe"
+
+
+# ==========================================
+# RULES - Categorization rules
+# ==========================================
+
 rules:
   # ==================== JEDZENIE ====================
 
