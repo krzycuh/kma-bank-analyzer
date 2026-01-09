@@ -6,17 +6,17 @@ set SCRIPT_DIR (dirname (status filename))
 set VENV_DIR "$SCRIPT_DIR/.venv"
 set PYTHON_CMD ""
 
-# Colors for output
+# Colors for output (using ANSI codes directly for consistency)
 function echo_info
-    echo (set_color green)"[INFO]"(set_color normal) $argv
+    printf '\033[0;32m[INFO]\033[0m %s\n' "$argv"
 end
 
 function echo_warn
-    echo (set_color yellow)"[WARN]"(set_color normal) $argv
+    printf '\033[1;33m[WARN]\033[0m %s\n' "$argv"
 end
 
 function echo_error
-    echo (set_color red)"[ERROR]"(set_color normal) $argv
+    printf '\033[0;31m[ERROR]\033[0m %s\n' "$argv"
 end
 
 # Find Python 3.9+
