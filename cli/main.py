@@ -166,23 +166,22 @@ def analyze(ctx, files, output, rules, overrides, json_output):
     # Show uncategorized transactions for easier rule improvement
     uncategorized_trans = [t for t in filtered_transactions if t.category_sub == "Nieprzypisane"]
     if uncategorized_trans:
-        click.echo("\n" + "-" * 80)
+        click.echo("\n" + "-" * 100)
         click.echo("UNCATEGORIZED TRANSACTIONS:")
-        click.echo("-" * 80)
+        click.echo("-" * 100)
         for trans in uncategorized_trans[:20]:  # Show max 20
+            # Build description - use full description if different from counterparty
+            desc = trans.description if trans.description != trans.counterparty else ""
             click.echo(
                 f"  [{trans.id}] {trans.date.strftime('%Y-%m-%d')} | "
-                f"{trans.amount:>8.2f} PLN | {trans.counterparty[:30]}"
+                f"{trans.amount:>8.2f} | {trans.counterparty[:25]:<25} | {desc[:50]}"
             )
-            # Show description on second line for context
-            if trans.description and trans.description != trans.counterparty:
-                click.echo(f"      -> {trans.description[:70]}")
         if len(uncategorized_trans) > 20:
             click.echo(f"  ... and {len(uncategorized_trans) - 20} more")
-        click.echo("-" * 80)
+        click.echo("-" * 100)
         click.echo("Tip: Add a rule to config/rules.yaml, or for one-time override run:")
         click.echo("  bank-analyzer override <ID> \"Category\" \"Subcategory\"")
-        click.echo("-" * 80)
+        click.echo("-" * 100)
 
     # Use filtered transactions for aggregation
     all_transactions = filtered_transactions

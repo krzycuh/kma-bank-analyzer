@@ -101,11 +101,18 @@ class AliorParser(BaseParser):
 
         trans_type = 'expense' if is_expense else 'income'
 
-        # Extract counterparty
+        # Extract counterparty - combine all available info
         counterparty = self._extract_counterparty(sender, recipient, description)
 
-        # Clean description
-        full_description = self._clean_text(description)
+        # Build full description from all non-empty fields
+        desc_parts = []
+        if sender:
+            desc_parts.append(f"Od: {sender}")
+        if recipient:
+            desc_parts.append(f"Do: {recipient}")
+        if description:
+            desc_parts.append(description)
+        full_description = " | ".join(desc_parts) if desc_parts else description
 
         return Transaction(
             date=date,
