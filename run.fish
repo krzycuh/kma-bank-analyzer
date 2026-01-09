@@ -8,24 +8,15 @@ set PYTHON_CMD ""
 
 # Colors for output
 function echo_info
-    set_color green
-    echo -n "[INFO] "
-    set_color normal
-    echo $argv
+    echo (set_color green)"[INFO]"(set_color normal) $argv
 end
 
 function echo_warn
-    set_color yellow
-    echo -n "[WARN] "
-    set_color normal
-    echo $argv
+    echo (set_color yellow)"[WARN]"(set_color normal) $argv
 end
 
 function echo_error
-    set_color red
-    echo -n "[ERROR] "
-    set_color normal
-    echo $argv
+    echo (set_color red)"[ERROR]"(set_color normal) $argv
 end
 
 # Find Python 3.9+
