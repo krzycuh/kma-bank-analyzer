@@ -118,21 +118,66 @@ Po zakończeniu wszystkich faz otrzymasz:
 6. **Monitoring** - health checks, logi, backup
 7. **Dokumentacja** - kompletna, z przykładami
 
-## 🚀 Quick Start (po implementacji)
+## 🚀 Quick Start - Łatwe uruchomienie
+
+### Sposób 1: Automatyczny skrypt (zalecany)
 
 ```bash
-# Faza 1: Użycie CLI
-pip install -e .
-bank-analyzer analyze data/input/*.csv
+# Linux / macOS / Raspberry Pi
+./run.sh analyze data/input/*.csv
 
-# Faza 2: Uruchomienie API
-docker-compose up
-
-# Faza 3+4: Production na RPI
-cd ~/kma-bank-analyzer
-docker-compose -f docker-compose.prod.yml up -d
-# n8n dostępne na http://[RPI_IP]:5678
+# Windows
+run.bat analyze data\input\*.csv
 ```
+
+Skrypt automatycznie:
+- Sprawdzi czy masz Python 3.9+
+- Utworzy wirtualne środowisko
+- Zainstaluje wszystkie zależności
+- Skopiuje przykładowe pliki konfiguracyjne
+- Uruchomi analizę
+
+### Sposób 2: Ręczna instalacja
+
+```bash
+# 1. Utwórz wirtualne środowisko
+python3 -m venv .venv
+source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate   # Windows
+
+# 2. Zainstaluj zależności
+pip install -e .
+
+# 3. Skopiuj konfigurację
+cp config/rules.example.yaml config/rules.yaml
+cp config/categories.example.yaml config/categories.yaml
+
+# 4. Umieść pliki CSV w data/input/ i uruchom
+bank-analyzer analyze data/input/*.csv
+```
+
+### Komendy CLI
+
+```bash
+# Analiza plików CSV
+bank-analyzer analyze plik1.csv plik2.csv -o raport.xlsx
+
+# Parsowanie bez kategoryzacji
+bank-analyzer parse plik.csv
+
+# Wykrycie formatu banku
+bank-analyzer detect plik.csv
+
+# Wersja
+bank-analyzer version
+```
+
+### Wymagania systemowe
+
+- **Python:** 3.9 lub nowszy
+- **Systemy:** Linux, macOS, Windows, Raspberry Pi
+- **Pamięć:** ~50MB RAM
+- **Dysk:** ~20MB
 
 ## 📊 Struktury danych
 

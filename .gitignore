@@ -205,3 +205,33 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# ==========================================
+# Bank Analyzer specific
+# ==========================================
+
+# Data files (SENSITIVE!)
+data/
+*.csv
+*.xlsx
+*.xls
+!tests/fixtures/*.csv
+
+# User configuration (may contain sensitive paths)
+config/categories.yaml
+config/rules.yaml
+.bank-analyzer.yaml
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups
+backups/
+*.backup
