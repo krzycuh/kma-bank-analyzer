@@ -13,17 +13,25 @@ logger = get_logger(__name__)
 class Aggregator:
     """Aggregate transactions by categories and time periods."""
 
-    def aggregate(self, transactions: List[Transaction]) -> Dict[str, Any]:
+    def aggregate(
+        self,
+        transactions: List[Transaction],
+        excluded: List[Transaction] = None,
+    ) -> Dict[str, Any]:
         """
         Aggregate transactions by year, month, and category.
 
         Args:
             transactions: List of transactions to aggregate
+            excluded: Transactions excluded by rules - reported separately
+                      (visible in exports) but never counted into totals
 
         Returns:
             Dictionary with aggregated data structure
         """
-        logger.info(f"Aggregating {len(transactions)} transactions")
+        excluded = excluded or []
+        logger.info(f"Aggregating {len(transactions)} transactions "
+                    f"({len(excluded)} excluded)")
 
         # Group by years and months
         data = defaultdict(lambda: defaultdict(lambda: {
@@ -75,11 +83,12 @@ class Aggregator:
         result = {
             'years': {},
             'uncategorized': uncategorized,
-            'all_transactions': transactions,
+            'all_transactions': transactions + excluded,
             'summary': {
                 'total_transactions': len(transactions),
                 'total_categorized': len(transactions) - len(uncategorized),
                 'total_uncategorized': len(uncategorized),
+                'total_excluded': len(excluded),
             }
         }
 
@@ -136,6 +145,35 @@ class Aggregator:
             }
 
             result['years'][year] = year_data
+
+        # Aggregate excluded transactions separately (never part of totals):
+        # per year/month, grouped by exclusion reason
+        excluded_years: Dict[int, Dict[str, Any]] = {}
+        for trans in excluded:
+            year = trans.date.year
+            month = trans.date.month
+            reason = trans.category_sub or 'wykluczone'
+            ydata = excluded_years.setdefault(
+                year, {'months': {}, 'reasons_year': {}}
+            )
+            month_reasons = ydata['months'].setdefault(month, {})
+            for bucket in (
+                month_reasons.setdefault(
+                    reason, {'expense': Decimal('0'), 'income': Decimal('0')}
+                ),
+                ydata['reasons_year'].setdefault(
+                    reason, {'expense': Decimal('0'), 'income': Decimal('0')}
+                ),
+            ):
+                if trans.transaction_type == 'expense':
+                    bucket['expense'] += trans.amount
+                else:
+                    bucket['income'] += trans.amount
+
+        result['excluded'] = {
+            'transactions': excluded,
+            'years': excluded_years,
+        }
 
         logger.info(
             f"Aggregated {len(result['years'])} years, "

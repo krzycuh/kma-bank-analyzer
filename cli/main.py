@@ -311,21 +311,23 @@ def analyze(ctx, files, output, rules, overrides, json_output):
         click.echo("  Using empty rules (all will be uncategorized)")
         rule_engine = RuleEngine(None)
 
-    # Filter out excluded transactions
+    # Filter out excluded transactions (kept for reporting, not for totals)
     click.echo("\nFiltering excluded transactions...")
     filtered_transactions = []
-    excluded_count = 0
+    excluded_transactions = []
 
     for trans in all_transactions:
         should_exclude, reason = rule_engine.should_exclude(trans)
         if should_exclude:
-            excluded_count += 1
+            trans.category_main = "Wykluczone"
+            trans.category_sub = reason
+            excluded_transactions.append(trans)
             logger.debug(f"Excluded: {trans.counterparty} - {reason}")
         else:
             filtered_transactions.append(trans)
 
-    if excluded_count > 0:
-        click.echo(f"  Excluded: {excluded_count} transactions")
+    if excluded_transactions:
+        click.echo(f"  Excluded: {len(excluded_transactions)} transactions")
         # Show exclusion stats
         exclude_stats = rule_engine.get_exclude_stats()
         if exclude_stats:
@@ -380,13 +382,12 @@ def analyze(ctx, files, output, rules, overrides, json_output):
         click.echo("  bank-analyzer override <ID> \"Category\" \"Subcategory\"")
         click.echo("-" * 100)
 
-    # Use filtered transactions for aggregation
-    all_transactions = filtered_transactions
-
-    # Aggregation
+    # Aggregation (excluded transactions reported separately, not in totals)
     click.echo("\nAggregating data...")
     aggregator = Aggregator()
-    aggregated = aggregator.aggregate(all_transactions)
+    aggregated = aggregator.aggregate(
+        filtered_transactions, excluded=excluded_transactions
+    )
 
     # Export to Excel
     click.echo(f"\nExporting to Excel: {output}")

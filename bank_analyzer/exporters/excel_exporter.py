@@ -143,6 +143,33 @@ class ExcelExporter:
                 ws, next_row, "SUMA MIESIĘCZNA (przychody)", income_mains,
                 sum_fill,
             )
+            row = next_row + 2
+
+        # Excluded section: shown for reference only, never part of totals.
+        # Reuses the category writer via a pseudo year_data keyed by reason.
+        excluded_year = (
+            data.get('excluded', {}).get('years', {}).get(year)
+        )
+        if excluded_year:
+            ws.cell(row, 1, "WYKLUCZONE (poza sumami)").font = Font(
+                bold=True, size=12
+            )
+            pseudo_year_data = {
+                'categories_year': {
+                    'Wykluczone': excluded_year.get('reasons_year', {})
+                },
+                'months': {
+                    month: {'categories': {'Wykluczone': reasons}}
+                    for month, reasons in excluded_year.get('months', {}).items()
+                },
+            }
+            next_row, excluded_mains = self._write_category_section(
+                ws, pseudo_year_data, row + 1, section='expense'
+            )
+            self._write_sum_row(
+                ws, next_row, "SUMA MIESIĘCZNA (wykluczone)", excluded_mains,
+                sum_fill,
+            )
 
         # Column widths
         ws.column_dimensions['A'].width = 35
@@ -329,6 +356,11 @@ class ExcelExporter:
             ws.cell(row, 8, trans.id)
 
             ws.cell(row, 4).number_format = '#,##0.00'
+
+            # Excluded transactions greyed out - visible but out of totals
+            if trans.category_main == 'Wykluczone':
+                for col in range(1, 9):
+                    ws.cell(row, col).font = Font(color="999999")
 
             # Alternate row coloring
             if row % 2 == 0:
